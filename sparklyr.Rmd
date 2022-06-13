@@ -7,9 +7,9 @@ date: "2022-06-08"
 ```{r}
 library(sparklyr)
 conf <- spark_config_kubernetes(
-  master = "k8s://https://34.123.104.67", # Type kubectl cluster-info to get this url.
+  master = "k8s://https://34.132.74.119", # Type kubectl cluster-info to get this url.
   version = "3.2",
-  image = "gloryvine/spark:3.2.1",
+  image = "us-central1-docker.pkg.dev/glossy-essence-352111/docker/spark:3.2.1",
   driver = "sparklyr",
   account = "spark",
   jars = "local:///opt/sparklyr",
