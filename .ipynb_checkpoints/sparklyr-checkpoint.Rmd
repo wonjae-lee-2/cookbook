@@ -17,7 +17,7 @@ conf <- spark_config_kubernetes(
 )
 conf$sparklyr.shell.conf <- c( # The following settings should be here to be used for spark-submit.
   conf$sparklyr.shell.conf,
-  "spark.kubernetes.namespace=cluster", # Use the namespace created by install-gcloud.sh
+  "spark.kubernetes.namespace=lee", # Use the namespace created by install-gcloud.sh
   "spark.driver.cores=4",
   "spark.driver.memory=16g"
 )
