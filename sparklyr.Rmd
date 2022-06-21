@@ -4,12 +4,15 @@ output: html_document
 date: "2022-06-08"
 ---
 
+Open a new terminal in the RStudio Server to load `~/keys/gcloud-auth.sh`.
+Type `kubectl cluster-info` to get the 'master' for the 'spark_config_kubernetes'.
+
 ```{r}
 library(sparklyr)
 conf <- spark_config_kubernetes(
-  master = "k8s://https://35.238.98.9", # Type kubectl cluster-info to get this url.
-  version = "3.2",
-  image = "us-central1-docker.pkg.dev/project-lee-1/docker/spark:3.2.1",
+  master = "k8s://https://35.223.203.139", # Type kubectl cluster-info to get this url.
+  version = "3.3",
+  image = "us-central1-docker.pkg.dev/project-lee-1/docker/spark:3.3.0",
   driver = "sparklyr",
   account = "admin", # Use the system account created by install-gcloud.sh
   jars = "local:///opt/sparklyr",
@@ -28,7 +31,7 @@ conf$spark.executor.memory <- "4g"
 ```{r}
 sc <- spark_connect(
   config = conf,
-  spark_home = "/opt/spark-3.2.1" # Use the folder where Spark was installed by install-spark.sh
+  spark_home = "/opt/spark/3.3.0" # Use the folder where Spark was installed by install-spark.sh
 )
 ```
 
@@ -36,8 +39,8 @@ sc <- spark_connect(
 connection_is_open(sc)
 ```
 
-Open a new terminal on the virtual machine and press "shift + ` +  c" to request local forward for 4040.
-Type `kubectl port-forward sparklyr 4040:4040` on the virtual machine.
+Go to a terminal on the virtual machine and press "shift + ` +  c" to request local forward for 4040.
+Type `kubectl port-forward pod/sparklyr 4040:4040` on the virtual machine.
 Then go to `localhost:4040` in the web browser on the local machine to access Spark Web UI.
 
 ```{r}
