@@ -10,7 +10,7 @@ Type `kubectl cluster-info` to get the 'master' for the 'spark_config_kubernetes
 ```{r}
 library(sparklyr)
 conf <- spark_config_kubernetes(
-  master = "k8s://https://35.223.203.139", # Type kubectl cluster-info to get this url.
+  master = "k8s://https://34.136.32.95", # Type kubectl cluster-info to get this url.
   version = "3.3",
   image = "us-central1-docker.pkg.dev/project-lee-1/docker/spark:3.3.0",
   driver = "sparklyr",
@@ -31,7 +31,7 @@ conf$spark.executor.memory <- "4g"
 ```{r}
 sc <- spark_connect(
   config = conf,
-  spark_home = "/opt/spark/3.3.0" # Use the folder where Spark was installed by install-spark.sh
+  spark_home = "/opt/spark/3.3.0" # Use the folder where Spark was installed by spark.sh
 )
 ```
 
@@ -72,3 +72,6 @@ spark_disconnect(sc)
 system2("pkill", "kubectl") # Cancel port forward.
 system2("kubectl", "delete pods --all") # Delete all pods.
 ```
+
+Using the terminal in RStudio Server, type `gcloud container clusters resize cluster-1 --num-nodes=0 --zone=us-central1-c --async` to resize the cluster to 0 node.
+
