@@ -5,12 +5,17 @@ date: "2022-06-08"
 ---
 
 Open a new terminal in the RStudio Server to load `~/keys/gcloud-auth.sh`.
-Type `kubectl cluster-info` to get the 'master' for the 'spark_config_kubernetes'.
+
+Using the terminal in this RStudio Server,
+
+- Type `kubectl cluster-info` to get the 'master' for the 'spark_config_kubernetes'.
+
+- Type `gcloud container clusters resize cluster-1 --num-nodes=1 --zone=us-central1-c` to resize `cluster-1` in the zone `us-central1-c` to 1 or more.
 
 ```{r}
 library(sparklyr)
 conf <- spark_config_kubernetes(
-  master = "k8s://https://34.136.32.95", # Type kubectl cluster-info to get this url.
+  master = "k8s://https://146.148.51.117", # Type kubectl cluster-info to get this url.
   version = "3.3",
   image = "us-central1-docker.pkg.dev/project-lee-1/docker/spark:3.3.0",
   driver = "sparklyr",
@@ -39,8 +44,10 @@ sc <- spark_connect(
 connection_is_open(sc)
 ```
 
-Go to a terminal on the virtual machine and press "shift + ` +  c" to request local forward for 4040.
+Go to a terminal on the virtual machine and press "shift + ` +  c" and then -L 4040:localhost:4040 to request local forward for 4040.
+
 Type `kubectl port-forward pod/sparklyr 4040:4040` on the virtual machine.
+
 Then go to `localhost:4040` in the web browser on the local machine to access Spark Web UI.
 
 ```{r}
@@ -73,5 +80,11 @@ system2("pkill", "kubectl") # Cancel port forward.
 system2("kubectl", "delete pods --all") # Delete all pods.
 ```
 
-Using the terminal in RStudio Server, type `gcloud container clusters resize cluster-1 --num-nodes=0 --zone=us-central1-c --async` to resize the cluster to 0 node.
+Using the terminal in this RStudio Server, type `gcloud container clusters resize cluster-1 --num-nodes=0 --zone=us-central1-c --async` to resize the cluster to 0 node.
+
+Using the terminal on the virtual machine,
+
+- Press `ctrl` + `c` to stop port-forwarding to the service using `kubectl`.
+
+- `-KL 4040` to stop local forward from the local machine to the virtual machine.
 
