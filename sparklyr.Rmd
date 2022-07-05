@@ -4,33 +4,34 @@ output: html_document
 date: "2022-06-08"
 ---
 
+This recipe deploys a Spark cluster on the GKE autopilot cluster. Most likely, you will have to run `spark_connect` twice. The first run of `spark_connect` can fail because it is likely to take longer than the timeout to download the Spark image to the GKE autopilot cluster. It is difficult to predict whether the Spark image has been previously downloaded to the GKE autopilot cluster or not. Hence, I set the timeout shorter than the default to start Spark quickly if the image already exists or run `spark_connect` again after you download the image in the first attempt.
+
 Open a new terminal in the RStudio Server to load `~/keys/gcloud-auth.sh`.
 
 Using the terminal in this RStudio Server,
 
-- Type `kubectl cluster-info` to get the 'master' for the 'spark_config_kubernetes'.
-
-- Type `gcloud container clusters resize cluster-1 --num-nodes=1 --zone=us-central1-c` to resize `cluster-1` in the zone `us-central1-c` to 1 or more.
+- Type `kubectl cluster-info` to get the 'master' address for the 'spark_config_kubernetes'.
 
 ```{r}
 library(sparklyr)
 conf <- spark_config_kubernetes(
-  master = "k8s://https://146.148.51.117", # Type kubectl cluster-info to get this url.
+  master = "k8s://https://34.122.136.10", # Type kubectl cluster-info to get this url.
   version = "3.3",
   image = "us-central1-docker.pkg.dev/project-lee-1/docker/spark:3.3.0",
   driver = "sparklyr",
-  account = "admin", # Use the system account created by install-gcloud.sh
+  account = "spark-admin", # Use the system account created by install-gcloud.sh with the NAMESPACE environment variable from compose.yml.
   jars = "local:///opt/sparklyr",
-  executors = 10
+  executors = 10,
+  timeout = 20 
 )
 conf$sparklyr.shell.conf <- c( # The following settings should be here to be used for spark-submit.
   conf$sparklyr.shell.conf,
-  "spark.kubernetes.namespace=cluster", # Use the namespace created by install-gcloud.sh
+  "spark.kubernetes.namespace=spark", # Use the namespace created by install-gcloud.sh  with the NAMESPACE environment variable from compose.yml.
   "spark.driver.cores=4",
-  "spark.driver.memory=16g"
+  "spark.driver.memory=16g",
+  "spark.executor.cores=1",
+  "spark.executor.memory=4g"
 )
-conf$spark.executor.cores <- 1
-conf$spark.executor.memory <- "4g"
 ```
 
 ```{r}
@@ -40,13 +41,20 @@ sc <- spark_connect(
 )
 ```
 
+If the `spark_connect` above fails, do the following and then run the cell above again.
+
+Using the terminal in this RStudio Server,
+
+- Type `kubectl get all` several times until the container is 'running'.
+- Type `kubectl delete pods --all` to delete all running container.
+
 ```{r}
 connection_is_open(sc)
 ```
 
 Go to a terminal on the virtual machine and press "shift + ` +  c" and then -L 4040:localhost:4040 to request local forward for 4040.
 
-Type `kubectl port-forward pod/sparklyr 4040:4040` on the virtual machine.
+Type `kubectl port-forward pod/sparklyr 4040:4040 -n spark` on the virtual machine.
 
 Then go to `localhost:4040` in the web browser on the local machine to access Spark Web UI.
 
@@ -75,16 +83,12 @@ summary(fit)
 spark_disconnect(sc)
 ```
 
-```{r}
-system2("pkill", "kubectl") # Cancel port forward.
-system2("kubectl", "delete pods --all") # Delete all pods.
-```
+Using the terminal in this RStudio Server, 
 
-Using the terminal in this RStudio Server, type `gcloud container clusters resize cluster-1 --num-nodes=0 --zone=us-central1-c --async` to resize the cluster to 0 node.
+- Type `kubectl delete pods --all` to delete all pods in the namespace.
 
 Using the terminal on the virtual machine,
 
 - Press `ctrl` + `c` to stop port-forwarding to the service using `kubectl`.
 
 - `-KL 4040` to stop local forward from the local machine to the virtual machine.
-
