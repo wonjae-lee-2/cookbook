@@ -15,7 +15,7 @@ Using the terminal in this RStudio Server,
 ```{r}
 library(sparklyr)
 conf <- spark_config_kubernetes(
-  master = "k8s://https://35.193.195.65", # Type kubectl cluster-info to get this url.
+  master = "k8s://https://34.123.27.98", # Type kubectl cluster-info to get this url.
   version = "3.3",
   image = "us-central1-docker.pkg.dev/project-lee-1/docker/spark:3.3.0",
   driver = "sparklyr",
