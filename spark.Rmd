@@ -6,7 +6,7 @@ date: "2022-06-08"
 
 This recipe deploys a Spark cluster on the GKE autopilot cluster. Most likely, you will have to run `spark_connect` twice. The first run of `spark_connect` can fail because it is likely to take longer than the timeout to download the Spark image to the GKE autopilot cluster. It is difficult to predict whether the Spark image has been previously downloaded to the GKE autopilot cluster or not. Hence, I set the timeout shorter than the default to start Spark quickly if the image already exists. If it does not, run `spark_connect` again after you download the image in the first attempt.
 
-Open a new terminal in the RStudio Server to load `~/keys/gcloud-auth.sh`.
+Open a new terminal in the RStudio Server to load `~/secret/gcloud-auth.sh`.
 
 Using the terminal in this RStudio Server,
 
@@ -15,7 +15,7 @@ Using the terminal in this RStudio Server,
 ```{r}
 library(sparklyr)
 conf <- spark_config_kubernetes(
-  master = "k8s://https://34.123.27.98", # Type kubectl cluster-info to get this url.
+  master = "k8s://https://34.68.16.121", # Type kubectl cluster-info to get this url.
   version = "3.3",
   image = "us-central1-docker.pkg.dev/project-lee-1/docker/spark:3.3.0",
   driver = "sparklyr",
@@ -55,7 +55,9 @@ Using the terminal in this RStudio Server,
 connection_is_open(sc)
 ```
 
-Type `kubectl port-forward pod/sparklyr 4040:4040 -n spark` on WSL.
+Press shift + ` + c and then `-L 4040:localhost:4040` in the Spot VM terminal.
+
+Type `kubectl port-forward pod/sparklyr 4040:4040 -n spark` in the Spot VM terminal.
 
 Then go to `localhost:4040` in the web browser on the local machine to access Spark Web UI.
 
@@ -88,6 +90,8 @@ Using the terminal in this RStudio Server,
 
 - Type `kubectl delete pods --all` to delete all pods in the namespace.
 
-Using the WSL terminal,
+Using the spot VM terminal,
 
 - Press `ctrl` + `c` to stop port-forwarding to the driver pod using `kubectl`.
+
+- Press shift + ` + c and then `-KL 4040` to stop port-forwarding between the local machine and the spot VM.
